@@ -1,5 +1,5 @@
 import promisesForPages from './promiseForPages';
-import SpotifyWebApi from './spotifyApi';
+import SpotifyWebApi, { SpotifyArtistType } from './spotifyApi';
 
 export const fetchUserOwnedPlaylists = async (
   api: SpotifyWebApi,
@@ -20,3 +20,21 @@ export const fetchUserOwnedPlaylists = async (
     []
   );
 };
+
+
+export const fetchUserTopArtists = async (
+  api: SpotifyWebApi,
+  userId: string
+): Promise<Array<SpotifyArtistType>> => {
+  const pages = await promisesForPages(
+    api,
+    api.getUserTopArtists(userId, { time_range: 'long_term', limit: 200 })
+  );
+  console.log(pages);
+
+  return pages.reduce(
+    (array, currentPage) => array.concat(currentPage.items), []
+  );
+};
+
+

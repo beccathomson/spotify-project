@@ -1,4 +1,4 @@
-import { fetchUserOwnedPlaylists } from './library';
+import { fetchUserOwnedPlaylists, fetchUserTopArtists } from './library';
 import { PlaylistDeduplicator, SavedTracksDeduplicator } from './deduplicator';
 import PlaylistCache from './playlistCache';
 import { PlaylistModel } from './types';
@@ -6,6 +6,7 @@ import SpotifyWebApi, {
   SpotifyUserType,
   SpotifyPlaylistType,
   SpotifyTrackType,
+  SpotifyArtistType,
 } from './spotifyApi';
 
 const playlistCache = new PlaylistCache();
@@ -14,7 +15,7 @@ const playlistToPlaylistModel = (
   playlist: SpotifyPlaylistType
 ): PlaylistModel => ({
   playlist: playlist,
-  duplicates: [],
+  unpopularSongs: [],
   status: '',
   processed: false,
 });
@@ -39,7 +40,7 @@ export default class {
     const currentState: {
       playlists?: Array<PlaylistModel>;
       savedTracks?: {
-        duplicates?: Array<any>;
+        unpopularSongs?: Array<any>;
       };
       toProcess?: number;
     } = {};
@@ -58,6 +59,23 @@ export default class {
     }
 
     let playlistsToCheck = [];
+
+    const allTopArtists: Array<SpotifyArtistType> = await fetchUserTopArtists(
+      api,
+      user.id
+    ).catch((e) => {
+      if (global['ga']) {
+        global['ga'](
+          'send',
+          'event',
+          'spotify-dedup',
+          'error-fetching-user-top-artists'
+        );
+      }
+      console.error("There was an error fetching user's top artists", e);
+    });
+
+
     const ownedPlaylists: Array<SpotifyPlaylistType> = await fetchUserOwnedPlaylists(
       api,
       user.id
@@ -73,7 +91,8 @@ export default class {
       console.error("There was an error fetching user's playlists", e);
     });
 
-    if (ownedPlaylists) {
+    if (allTopArtists) {
+      console.log(allTopArtists.map((artist) => artist.name));
       playlistsToCheck = ownedPlaylists;
       currentState.playlists = playlistsToCheck.map((p) =>
         playlistToPlaylistModel(p)
@@ -85,10 +104,11 @@ export default class {
         api,
         api.getMySavedTracks({ limit: 50 })
       );
-      currentState.savedTracks.duplicates = SavedTracksDeduplicator.findDuplicatedTracks(
+      currentState.savedTracks.unpopularSongs = SavedTracksDeduplicator.findUnpopularSongs(
+        allTopArtists,
         savedTracks
       );
-      if (currentState.savedTracks.duplicates.length && global['ga']) {
+      if (currentState.savedTracks.unpopularSongs.length && global['ga']) {
         global['ga'](
           'send',
           'event',
@@ -107,10 +127,11 @@ export default class {
               api,
               playlistModel.playlist
             );
-            playlistModel.duplicates = PlaylistDeduplicator.findDuplicatedTracks(
+            playlistModel.unpopularSongs = PlaylistDeduplicator.findUnpopularSongs(
+              allTopArtists,
               playlistTracks
             );
-            if (playlistModel.duplicates.length === 0) {
+            if (playlistModel.unpopularSongs.length === 0) {
               playlistCache.storePlaylistWithoutDuplicates(
                 playlistModel.playlist
               );

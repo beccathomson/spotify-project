@@ -4,6 +4,7 @@ import SpotifyWebApi, {
   SpotifyPlaylistType,
   SpotifyPlaylistTrackType,
   SpotifySavedTrackType,
+  SpotifyArtistType,
 } from './spotifyApi';
 import { PlaylistModel } from './types';
 
@@ -16,45 +17,30 @@ class BaseDeduplicator {
     throw 'Not implemented';
   }
 
-  static findDuplicatedTracks(tracks: Array<SpotifyTrackType>) {
-    const seenIds: { [key: string]: boolean } = {};
-    const seenNameAndArtist: { [key: string]: Array<number> } = {};
-    const result = tracks.reduce((duplicates, track, index) => {
-      if (track === null) return duplicates;
-      if (track.id === null) return duplicates;
-      let isDuplicate = false;
-      const seenNameAndArtistKey =
-        `${track.name}:${track.artists[0].name}`.toLowerCase();
-      if (track.id in seenIds) {
-        // if the two tracks have the same Spotify ID, they are duplicates
-        isDuplicate = true;
+  // compare the main artist of each track with list of all user top artists, return track if artist has
+  // never been in user's top artists
+
+
+  // TODO: make map of artist ids
+  static findUnpopularSongs(topArtists: Array<SpotifyArtistType>, tracks: Array<SpotifyTrackType>) {
+    const topArtistIds: string[] = topArtists.map((artist) => artist.id);
+
+    const result = tracks.reduce((unpopularSongs, track, index) => {
+      if (track?.artists === null) return unpopularSongs;
+      let isPopular = true;
+      const mainArtistId = track.artists[0].id;
+      if (topArtistIds.includes(mainArtistId)) {
+        return unpopularSongs
       } else {
-        // if they have the same name, main artist, and roughly same duration
-        // we consider tem duplicates too
-        if (seenNameAndArtistKey in seenNameAndArtist) {
-          // we check if _any_ of the previous durations is similar to the one we are checking
-          if (
-            seenNameAndArtist[seenNameAndArtistKey].filter(
-              (duration) => Math.abs(duration - track.duration_ms) < 2000
-            ).length !== 0
-          ) {
-            isDuplicate = true;
-          }
-        }
-      }
-      if (isDuplicate) {
-        duplicates.push({
+        isPopular = false;
+        unpopularSongs.push({
           index: index,
           track: track,
-          reason: track.id in seenIds ? 'same-id' : 'same-name-artist',
+          reason: 'bad-artist',
         });
-      } else {
-        seenIds[track.id] = true;
-        seenNameAndArtist[seenNameAndArtistKey] =
-          seenNameAndArtist[seenNameAndArtistKey] || [];
-        seenNameAndArtist[seenNameAndArtistKey].push(track.duration_ms);
       }
-      return duplicates;
+
+      return unpopularSongs;
     }, []);
     return result;
   }
@@ -73,7 +59,7 @@ export class PlaylistDeduplicator extends BaseDeduplicator {
       )
         .then(
           (
-            pagePromises // todo: I'd love to replace this with
+            pagePromises // todo: I'd love to replace this with //@us could we do this for him ?
           ) =>
             // .then(Promise.all)
             // à la http://www.html5rocks.com/en/tutorials/es6/promises/#toc-transforming-values
@@ -106,7 +92,7 @@ export class PlaylistDeduplicator extends BaseDeduplicator {
           'It is not possible to delete duplicates from a collaborative playlist using this tool since this is not supported in the Spotify Web API. You will need to remove these manually.'
         );
       } else {
-        const tracksToRemove = playlistModel.duplicates
+        const tracksToRemove = playlistModel.unpopularSongs
           .map((d) => ({
             uri: d.track.linked_from ? d.track.linked_from.uri : d.track.uri,
             positions: [d.index],
@@ -132,7 +118,7 @@ export class PlaylistDeduplicator extends BaseDeduplicator {
             Promise.resolve(null)
           )
           .then(() => {
-            playlistModel.duplicates = [];
+            playlistModel.unpopularSongs = [];
             resolve();
           })
           .catch((e) => {

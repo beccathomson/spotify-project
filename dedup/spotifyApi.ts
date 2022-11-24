@@ -4,6 +4,12 @@ export type SpotifyArtistType = {
   name: string;
 };
 
+export enum TimeRange {
+  LONG_TERM = "long_term",
+  MEDIUM_TERM = "medium_term",
+  SHORT_TERM = "short_term"
+}
+
 export type SpotifyTrackType = {
   artists: Array<SpotifyArtistType>;
   duration_ms: number;
@@ -116,8 +122,8 @@ export default class SpotifyWebApi {
       Object.keys(options).length === 0
         ? ''
         : `?${Object.keys(options)
-            .map((k) => `${k}=${options[k]}`)
-            .join('&')}`;
+          .map((k) => `${k}=${options[k]}`)
+          .join('&')}`;
 
     try {
       const res = await fetch(`${url}${optionsString}`, {
@@ -138,6 +144,11 @@ export default class SpotifyWebApi {
       typeof userId === 'string'
         ? `${apiPrefix}/users/${encodeURIComponent(userId)}/playlists`
         : `${apiPrefix}/me/playlists`;
+    return await this.getGeneric(url, options);
+  }
+
+  async getUserTopArtists(userId: string, options?: { time_range?: string, limit?: number }) {
+    const url = `${apiPrefix}/me/top/artists`;
     return await this.getGeneric(url, options);
   }
 

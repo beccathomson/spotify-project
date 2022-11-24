@@ -85,7 +85,9 @@ export default class Index extends React.Component {
         'playlist-modify-public',
         'playlist-modify-private',
         'user-library-read',
+        'user-top-read', // needed
         'user-library-modify',
+
       ],
     }).catch(function (error) {
       console.error('There was an error obtaining the token', error);

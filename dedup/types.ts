@@ -3,7 +3,7 @@ import { ReactElement } from 'react';
 
 export type PlaylistModel = {
   playlist: SpotifyPlaylistType;
-  duplicates: Array<{
+  unpopularSongs: Array<{
     index: number;
     reason: string;
     track: SpotifyTrackType;
