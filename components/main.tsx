@@ -2,6 +2,9 @@ import {
   PlaylistDeduplicator,
   SavedTracksDeduplicator,
 } from '../dedup/deduplicator';
+import {
+  PlaylistCreator
+} from "../dedup/playlistCreator";
 import { SpotifyTrackType, SpotifyUserType } from '../dedup/spotifyApi';
 import { Translation, getI18n, useTranslation } from 'react-i18next';
 
@@ -39,6 +42,7 @@ type StateType = {
     }>;
   };
   hasUsedSpotifyTop?: boolean;
+  selectedTrackUris: Array<string>;
 };
 
 export default class Main extends React.Component<{
@@ -53,6 +57,7 @@ export default class Main extends React.Component<{
       status: null,
       unpopularSongs: [],
     },
+    selectedTrackUris: [],
   };
 
   componentDidMount() {
@@ -78,6 +83,10 @@ export default class Main extends React.Component<{
         })
         .catch((e) => { });
     } catch (e) { }
+  }
+
+  createNewPlaylist = () => {
+    PlaylistCreator.createPlaylistFromTracks(this.props.api, this.props.user.id, this.state.selectedTrackUris)
   }
 
   removeDuplicates = (playlist: PlaylistModel) => {
@@ -278,15 +287,28 @@ export default class Main extends React.Component<{
                             {(t) => t('process.saved.remove-button')}
                           </Translation>
                         </button>
+                        <button
+                          className="btn btn-primary btn-sm playlist-list-item__btn"
+                          onClick={() => this.createNewPlaylist()}
+                        >
+                          <Translation>
+                            {(t) => t('process.playlist.createPlaylist-button', { count: this.state.selectedTrackUris.length })}
+                          </Translation>
+                        </button>
                         <DuplicateTrackList>
                           {this.state.savedTracks.unpopularSongs.map(
                             (duplicate, index) => (
-                              <DuplicateTrackListItem
-                                key={index}
-                                reason={duplicate.reason}
-                                trackName={duplicate.track.name}
-                                trackArtistName={duplicate.track.artists[0].name}
-                              />
+                              <div key={index} className="itemWithCheckbox">
+                                <DuplicateTrackListItem
+                                  key={index}
+                                  reason={duplicate.reason}
+                                  trackName={duplicate.track.name}
+                                  trackArtistName={duplicate.track.artists[0].name}
+                                />
+                                <input value={duplicate.track.uri} onChange={(e) => {
+                                  this.setState({ ...this.state, selectedTrackUris: [...this.state.selectedTrackUris, e.target.value] })
+                                }} type="checkbox" />
+                              </div>
                             )
                           )}
                         </DuplicateTrackList>
@@ -434,6 +456,11 @@ export default class Main extends React.Component<{
 
             ul {
               padding: 0;
+            }
+
+            .itemWithCheckbox {
+              display:flex;
+              justify-content: space-between;
             }
           `}
         </style>

@@ -19,17 +19,19 @@ class BaseDeduplicator {
 
   // compare the main artist of each track with list of all user top artists, return track if artist has
   // never been in user's top artists
-
+  // could additionally check top songs over history
+  //todo: don't return duplicate songs
 
   // TODO: make map of artist ids
-  static findUnpopularSongs(topArtists: Array<SpotifyArtistType>, tracks: Array<SpotifyTrackType>) {
+  static findUnpopularSongs(topArtists: Array<SpotifyArtistType>, topTracks: Array<SpotifyTrackType>, tracks: Array<SpotifyTrackType>) {
     const topArtistIds: string[] = topArtists.map((artist) => artist.id);
+    const topTrackIds: string[] = topTracks.map((track) => track.id);
 
     const result = tracks.reduce((unpopularSongs, track, index) => {
       if (track?.artists === null) return unpopularSongs;
       let isPopular = true;
       const mainArtistId = track.artists[0].id;
-      if (topArtistIds.includes(mainArtistId)) {
+      if (topArtistIds.includes(mainArtistId) || topTrackIds.includes(track.id) || unpopularSongs.map(song => song.track.id).includes(track.id)) {
         return unpopularSongs
       } else {
         isPopular = false;

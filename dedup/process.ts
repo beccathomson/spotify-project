@@ -62,7 +62,21 @@ export default class {
 
     const allTopArtists: Array<SpotifyArtistType> = await fetchUserTopArtists(
       api,
-      user.id
+    ).catch((e) => {
+      if (global['ga']) {
+        global['ga'](
+          'send',
+          'event',
+          'spotify-dedup',
+          'error-fetching-user-top-artists'
+        );
+      }
+      console.error("There was an error fetching user's top artists", e);
+    });
+
+
+    const allTopTracks: Array<SpotifyTrackType> = await fetchUserTopArtists(
+      api,
     ).catch((e) => {
       if (global['ga']) {
         global['ga'](
@@ -106,6 +120,7 @@ export default class {
       );
       currentState.savedTracks.unpopularSongs = SavedTracksDeduplicator.findUnpopularSongs(
         allTopArtists,
+        allTopTracks,
         savedTracks
       );
       if (currentState.savedTracks.unpopularSongs.length && global['ga']) {
@@ -129,6 +144,7 @@ export default class {
             );
             playlistModel.unpopularSongs = PlaylistDeduplicator.findUnpopularSongs(
               allTopArtists,
+              allTopTracks,
               playlistTracks
             );
             if (playlistModel.unpopularSongs.length === 0) {

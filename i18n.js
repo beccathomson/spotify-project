@@ -2,17 +2,8 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 export const AvailableLanguages = [
-  'de',
   'en',
-  'es',
   'fr',
-  'id',
-  'it',
-  'nl',
-  'pl',
-  'pt',
-  'sv',
-  'tr',
 ];
 
 // the translations
@@ -74,6 +65,7 @@ const resources = {
       'process.saved.duplicates_other':
         'This collection has {{count}} duplicate songs',
       'process.saved.remove-button': 'Remove duplicates from your saved songs',
+      'process.playlist.createPlaylist-button': 'Create playlist from {{count}} songs',
       'process.playlist.duplicates_one':
         'This playlist has {{count}} duplicate song',
       'process.playlist.duplicates_other':

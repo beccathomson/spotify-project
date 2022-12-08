@@ -147,8 +147,8 @@ export default class SpotifyWebApi {
     return await this.getGeneric(url, options);
   }
 
-  async getUserTopArtists(userId: string, options?: { time_range?: string, limit?: number }) {
-    const url = `${apiPrefix}/me/top/artists`;
+  async getUserTopItems(itemType: string, options?: { time_range?: string, limit?: number }) {
+    const url = `${apiPrefix}/me/top/${itemType}`;
     return await this.getGeneric(url, options);
   }
 
@@ -187,6 +187,28 @@ export default class SpotifyWebApi {
         Authorization: `Bearer ${this.token}`,
       },
       body: JSON.stringify(trackIds),
+    });
+    return parseAPIResponse(res);
+  }
+
+  async createNewPlaylist(userId: string) {
+    const res = await fetch(`${apiPrefix}/users/${userId}/playlists`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+      body: JSON.stringify({ name: "new funky playlist" }),
+    });
+    return parseAPIResponse(res);
+  }
+
+  async addTracksToPlaylist(trackUris: Array<string>, playlistId) {
+    const res = await fetch(`${apiPrefix}/playlists/${playlistId}/tracks`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.token}`,
+      },
+      body: JSON.stringify(trackUris),
     });
     return parseAPIResponse(res);
   }
