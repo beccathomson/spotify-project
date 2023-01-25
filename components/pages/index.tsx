@@ -1,5 +1,3 @@
-import { AvailableLanguages } from '../../i18n';
-import Features from '../features';
 import Footer from '../footer';
 import Head from 'next/head';
 import Header from '../head';
@@ -20,12 +18,10 @@ const MetaHead = () => {
       <meta name="description" content={t('meta.description')} />
       <meta property="og:description" content={t('meta.description')} />
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:creator" content="@jmperezperez" />
       <meta name="viewport" content="width=device-width" />
       <meta property="og:image" content="https://spotify-dedup.com/spotify-dedup-meta.png" />
       <meta property="og:type" content="website" />
-      <link rel="alternate" hrefLang="x-default" href="https://spotify-dedup.com/" />
-      <link rel="icon" href="./logo.svg" />
+      <link rel="icon" href="https://spotify-funky-project.com/logo.svg" />
     </Head>
   );
 };
