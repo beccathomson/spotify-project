@@ -7,7 +7,7 @@ export const fetchUserOwnedPlaylists = async (
 ) => {
   const pages = await promisesForPages(
     api,
-    api.getUserPlaylists(userId, { limit: 50 })
+    api.getUserPlaylists(userId, { limit: 5 })
   );
 
   return pages.reduce(

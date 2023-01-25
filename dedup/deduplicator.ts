@@ -1,3 +1,4 @@
+import { SAVED_SONGS_ID } from '@/components/main';
 import promisesForPages from './promiseForPages';
 import SpotifyWebApi, {
   SpotifyTrackType,
@@ -79,56 +80,6 @@ export class PlaylistDeduplicator extends BaseDeduplicator {
     });
   }
 
-  static async removeDuplicates(
-    api: SpotifyWebApi,
-    playlistModel: PlaylistModel
-  ) {
-    return new Promise<void>((resolve, reject) => {
-      if (playlistModel.playlist.id === 'starred') {
-        reject(
-          'It is not possible to delete duplicates from your Starred playlist using this tool since this is not supported in the Spotify Web API. You will need to remove these manually.'
-        );
-      }
-      if (playlistModel.playlist.collaborative) {
-        reject(
-          'It is not possible to delete duplicates from a collaborative playlist using this tool since this is not supported in the Spotify Web API. You will need to remove these manually.'
-        );
-      } else {
-        const tracksToRemove = playlistModel.unpopularSongs
-          .map((d) => ({
-            uri: d.track.linked_from ? d.track.linked_from.uri : d.track.uri,
-            positions: [d.index],
-          }))
-          .reverse(); // reverse so we delete the last ones first
-        const promises = [];
-        do {
-          const chunk = tracksToRemove.splice(0, 100);
-          (function (playlistModel, chunk, api) {
-            promises.push(() =>
-              api.removeTracksFromPlaylist(
-                playlistModel.playlist.owner.id,
-                playlistModel.playlist.id,
-                chunk
-              )
-            );
-          })(playlistModel, chunk, api);
-        } while (tracksToRemove.length > 0);
-
-        promises
-          .reduce(
-            (promise, func) => promise.then(() => func()),
-            Promise.resolve(null)
-          )
-          .then(() => {
-            playlistModel.unpopularSongs = [];
-            resolve();
-          })
-          .catch((e) => {
-            reject(e);
-          });
-      }
-    });
-  }
 }
 
 export class SavedTracksDeduplicator extends BaseDeduplicator {
@@ -165,28 +116,89 @@ export class SavedTracksDeduplicator extends BaseDeduplicator {
     });
   }
 
-  static async removeDuplicates(
+
+  static async removeSelectedSongsFromPlaylist(
     api: SpotifyWebApi,
-    model: {
-      duplicates: Array<{
-        index: number;
-        reason: string;
-        track: SpotifyTrackType;
-      }>;
-    }
+    selectedSongUris: Array<string>,
+    playlistId: string
   ) {
     return new Promise<void>((resolve, reject) => {
-      const tracksToRemove: Array<string> = model.duplicates.map((d) =>
-        d.track.linked_from ? d.track.linked_from.id : d.track.id
-      );
+
+      const promises = [];
+      do {
+        const chunk = selectedSongUris.splice(0, 100);
+        (function (playlistModel, chunk, api) {
+          promises.push(() =>
+            api.removeTracksFromPlaylist(
+              playlistId,
+              chunk
+            )
+          );
+        })(playlistId, chunk, api);
+      } while (selectedSongUris.length > 0);
+
+      promises
+        .reduce(
+          (promise, func) => promise.then(() => func()),
+          Promise.resolve(null)
+        )
+        .then(() => {
+          selectedSongUris = [];
+          resolve();
+        })
+        .catch((e) => {
+          reject(e);
+        });
+
+    });
+  }
+
+
+
+  static async removeSelectedPlaylistSongs(
+    api: SpotifyWebApi,
+    selectedSongUris: Array<string>,
+    playlistIds: Array<string>
+  ) {
+
+    return Promise.all(playlistIds.map((playlistId) => this.removeSelectedSongsFromPlaylist(api, selectedSongUris, playlistId)));
+
+  }
+
+
+  static async removeSelectedSavedSongs(
+    api: SpotifyWebApi,
+    selectedSongUris: Array<string>
+
+  ) {
+    return new Promise<void>((resolve, reject) => {
       do {
         (async () => {
-          const chunk = tracksToRemove.splice(0, 50);
+          const chunk = selectedSongUris.splice(0, 50);
           await api.removeFromMySavedTracks(chunk);
         })();
-      } while (tracksToRemove.length > 0);
-      model.duplicates = [];
+      } while (selectedSongUris.length > 0);
+      selectedSongUris = [];
       resolve();
     });
+  }
+
+  static async removeSelectedSongs(
+    api: SpotifyWebApi,
+    selectedSongMap: Map<string, Array<SpotifyTrackType>>,
+    currentPlaylistId: string,
+  ) {
+
+    let allTracks = selectedSongMap.get(currentPlaylistId);
+    console.log(allTracks);
+    console.log(currentPlaylistId);
+    const trackUris = allTracks.map(track => track.uri);
+    const trackIds = allTracks.map((track) => track.id);
+
+    if (currentPlaylistId === SAVED_SONGS_ID) {
+      return this.removeSelectedSavedSongs(api, trackIds);
+    } else {
+      return this.removeSelectedSongsFromPlaylist(api, trackUris, currentPlaylistId);
+    }
   }
 }

@@ -4,11 +4,9 @@ import Footer from '../footer';
 import Head from 'next/head';
 import Header from '../head';
 import Intro from '../intro';
-import LanguageSelector from '../languageSelector';
 import Main from '../main';
 import OAuthManager from '../../dedup/oauthManager';
 import React from 'react';
-import Reviews from '../reviews';
 import SpotifyWebApi from '../../dedup/spotifyApi';
 import { useTranslation } from 'react-i18next';
 
@@ -25,37 +23,7 @@ const MetaHead = () => {
       <meta name="twitter:creator" content="@jmperezperez" />
       <meta name="viewport" content="width=device-width" />
       <meta property="og:image" content="https://spotify-dedup.com/spotify-dedup-meta.png" />
-      <link
-        rel="canonical"
-        href={
-          i18n.language === 'en'
-            ? 'https://spotify-dedup.com/'
-            : `https://spotify-dedup.com/${i18n.language}`
-        }
-      />
-      <meta
-        property="og:url"
-        content={
-          i18n.language === 'en'
-            ? 'https://spotify-dedup.com/'
-            : `https://spotify-dedup.com/${i18n.language}`
-        }
-      />
       <meta property="og:type" content="website" />
-      {AvailableLanguages.map(
-        (language) => (
-          <link
-            key={language}
-            rel="alternate"
-            hrefLang={language}
-            href={
-              language === 'en'
-                ? 'https://spotify-dedup.com/'
-                : `https://spotify-dedup.com/${language}`
-            }
-          ></link>
-        )
-      )}
       <link rel="alternate" hrefLang="x-default" href="https://spotify-dedup.com/" />
       <link rel="icon" href="https://spotify-dedup.com/logo.svg" />
     </Head>
@@ -119,11 +87,7 @@ export default class Index extends React.Component {
         ) : (
           <Intro onLoginClick={this.handleLoginClick} />
         )}
-        {this.state.isLoggedIn
-          ? null
-          : [<Features key={0} />, <Reviews key={1} />]}
         <Footer />
-        <LanguageSelector />
       </div>
     );
   }

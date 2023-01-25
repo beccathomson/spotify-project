@@ -9,13 +9,13 @@ import { SpotifyTrackType, SpotifyUserType } from '../dedup/spotifyApi';
 import { Translation, getI18n, useTranslation } from 'react-i18next';
 
 import Badge from './badge';
-import BuyMeACoffee from './bmc';
 import { DuplicateTrackList } from './duplicateTrackList';
 import { DuplicateTrackListItem } from './duplicateTrackListItem';
 import Panel from './panel';
 import { PlaylistModel } from '../dedup/types';
 import Process from '../dedup/process';
 import React from 'react';
+import { t } from 'i18next';
 
 const Status = ({ toProcess }) => {
   const { t } = useTranslation();
@@ -42,8 +42,11 @@ type StateType = {
     }>;
   };
   hasUsedSpotifyTop?: boolean;
-  selectedTrackUris: Array<string>;
+  // selectedTracks: Array<SpotifyTrackType>; // needs to be a map????
+  selectedTracks: Map<string, Array<SpotifyTrackType>>;
 };
+
+export const SAVED_SONGS_ID = "SAVED";
 
 export default class Main extends React.Component<{
   api: any;
@@ -57,7 +60,7 @@ export default class Main extends React.Component<{
       status: null,
       unpopularSongs: [],
     },
-    selectedTrackUris: [],
+    selectedTracks: new Map(),
   };
 
   componentDidMount() {
@@ -86,69 +89,20 @@ export default class Main extends React.Component<{
   }
 
   createNewPlaylist = () => {
-    PlaylistCreator.createPlaylistFromTracks(this.props.api, this.props.user.id, this.state.selectedTrackUris)
+    PlaylistCreator.createPlaylistFromTracks(this.props.api, this.props.user.id, this.state.selectedTracks)
   }
 
-  removeDuplicates = (playlist: PlaylistModel) => {
+  removeSelectedSongs(playlistId: string) {
     (async () => {
-      const index = this.state.playlists.findIndex(
-        (p) => p.playlist.id === playlist.playlist.id
-      );
-      const playlistModel = this.state.playlists[index];
-      if (playlistModel.playlist.id === 'starred') {
-        global['alert'] &&
-          global['alert'](
-            'It is not possible to delete duplicates from your Starred playlist using this tool since this is not supported in the Spotify Web API. You will need to remove these manually.'
-          );
-      }
-      if (playlistModel.playlist.collaborative) {
-        global['alert'] &&
-          global['alert'](
-            'It is not possible to delete duplicates from a collaborative playlist using this tool since this is not supported in the Spotify Web API. You will need to remove these manually.'
-          );
-      } else {
-        try {
-          await PlaylistDeduplicator.removeDuplicates(
-            this.props.api,
-            playlistModel
-          );
-          const playlistsCopy = [...this.state.playlists]; // update the UI after removal complete
-          playlistsCopy[index].unpopularSongs = [];
-          playlistsCopy[index].status = 'process.items.removed';
-          this.setState({ ...this.state, playlists: [...playlistsCopy] });
-          if (global['ga']) {
-            global['ga'](
-              'send',
-              'event',
-              'spotify-dedup',
-              'playlist-removed-duplicates'
-            );
-          }
-        } catch (e) {
-          global['Raven'] &&
-            global['Raven'].captureMessage(
-              `Exception trying to remove duplicates from playlist`,
-              {
-                extra: {
-                  duplicates: playlistModel.unpopularSongs,
-                },
-              }
-            );
-        }
-      }
-    })();
-  };
-
-  removeDuplicatesInSavedTracks() {
-    (async () => {
-      await SavedTracksDeduplicator.removeDuplicates(
+      await SavedTracksDeduplicator.removeSelectedSongs(
         this.props.api,
-        this.state.savedTracks
+        this.state.selectedTracks,
+        playlistId
       );
       this.setState({
         ...this.state,
         savedTracks: {
-          duplicates: [],
+          unpopularSongs: [],
           status: 'process.items.removed',
         },
       });
@@ -164,13 +118,7 @@ export default class Main extends React.Component<{
   }
 
   render() {
-    const totalDuplicates =
-      this.state.playlists.length === 0
-        ? 0
-        : this.state.playlists.reduce(
-          (prev, current) => prev + current.unpopularSongs.length,
-          0
-        ) + this.state.savedTracks.unpopularSongs.length;
+    const totalSelected = this.state.selectedTracks.size;
 
     return (
       <div className="mx-4 md:mx-0">
@@ -184,7 +132,7 @@ export default class Main extends React.Component<{
               {(t) => t('process.processing', { count: this.state.toProcess })}
             </Translation>
           )}
-          {this.state.toProcess === 0 && totalDuplicates > 0 && (
+          {this.state.toProcess === 0 && totalSelected > 0 && (
             <span>
               <Translation>
                 {(t) => t('process.status.complete.body')}
@@ -201,10 +149,9 @@ export default class Main extends React.Component<{
                   />
                 )}
               </Translation>
-              <BuyMeACoffee />
             </span>
           )}
-          {this.state.toProcess === 0 && totalDuplicates === 0 && (
+          {this.state.toProcess === 0 && totalSelected === 0 && (
             <span>
               <Translation>
                 {(t) => t('process.status.complete.body')}
@@ -213,7 +160,6 @@ export default class Main extends React.Component<{
               <Translation>
                 {(t) => t('process.status.complete.nodups.body')}
               </Translation>
-              <BuyMeACoffee />
               {this.state.hasUsedSpotifyTop === false ? (
                 <div>
                   <p>
@@ -281,32 +227,42 @@ export default class Main extends React.Component<{
                         </span>
                         <button
                           className="btn btn-primary btn-sm playlist-list-item__btn"
-                          onClick={() => this.removeDuplicatesInSavedTracks()}
+                          onClick={() => this.removeSelectedSongs(SAVED_SONGS_ID)}
                         >
-                          <Translation>
-                            {(t) => t('process.saved.remove-button')}
-                          </Translation>
+                          <label>
+                            Remove selected songs from saved tracks
+                          </label>
                         </button>
                         <button
                           className="btn btn-primary btn-sm playlist-list-item__btn"
                           onClick={() => this.createNewPlaylist()}
                         >
-                          <Translation>
-                            {(t) => t('process.playlist.createPlaylist-button', { count: this.state.selectedTrackUris.length })}
-                          </Translation>
+                          <label>
+                            Create playlist from selected songs
+                          </label>
                         </button>
                         <DuplicateTrackList>
                           {this.state.savedTracks.unpopularSongs.map(
-                            (duplicate, index) => (
+                            (song, index) => (
                               <div key={index} className="itemWithCheckbox">
                                 <DuplicateTrackListItem
                                   key={index}
-                                  reason={duplicate.reason}
-                                  trackName={duplicate.track.name}
-                                  trackArtistName={duplicate.track.artists[0].name}
+                                  reason={song.reason}
+                                  trackName={song.track.name}
+                                  trackArtistName={song.track.artists[0].name}
                                 />
-                                <input value={duplicate.track.uri} onChange={(e) => {
-                                  this.setState({ ...this.state, selectedTrackUris: [...this.state.selectedTrackUris, e.target.value] })
+                                <input value={song.track.uri} onChange={(e) => {
+                                  let selectedSavedTracks = this.state.selectedTracks.get(SAVED_SONGS_ID) ?? [];
+                                  const targetTrack = this.state.savedTracks.unpopularSongs.find((track) => track.track.uri === e.target.value);
+                                  if (selectedSavedTracks?.includes(targetTrack.track))
+                                    delete this.state.selectedTracks[targetTrack.track.id];
+                                  else {
+                                    const newMap = this.state.selectedTracks;
+                                    newMap.set(SAVED_SONGS_ID, [...selectedSavedTracks, targetTrack.track]);
+                                    this.state.selectedTracks.set(SAVED_SONGS_ID, [...selectedSavedTracks, targetTrack.track]);
+                                    this.setState({ ...this.state, selectedTracks: newMap }); // this is super slow
+                                  }
+
                                 }} type="checkbox" />
                               </div>
                             )
@@ -355,11 +311,11 @@ export default class Main extends React.Component<{
                         </span>
                         <button
                           className="btn btn-primary btn-sm playlist-list-item__btn"
-                          onClick={() => this.removeDuplicates(playlist)}
+                          onClick={() => this.removeSelectedSongs(playlist.playlist.id)}
                         >
-                          <Translation>
-                            {(t) => t('process.playlist.remove-button')}
-                          </Translation>
+                          <label>
+                            Remove selected songs from playlist
+                          </label>
                         </button>
                         <DuplicateTrackList>
                           {playlist.unpopularSongs.map((duplicate, index) => (

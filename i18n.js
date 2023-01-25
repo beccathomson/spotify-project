@@ -3,7 +3,6 @@ import { initReactI18next } from 'react-i18next';
 
 export const AvailableLanguages = [
   'en',
-  'fr',
 ];
 
 // the translations
@@ -12,13 +11,12 @@ const resources = {
   en: {
     translation: {
       'menu.link-home': 'Home',
-      'menu.link-stats': 'Stats',
-      'home.title': 'Spotify Deduplicator',
+      'home.title': 'Spotify Funky Project',
       'home.description':
-        'Remove duplicate songs from your playlists and saved songs.',
+        'Discover underplayed songs in your playlists and saved songs.',
       'home.login-button': 'Log in with Spotify',
       'meta.title':
-        'Spotify Dedup - Remove duplicate songs from your Spotify library',
+        'Spotify Funky Project - Discover underplayed songs from your Spotify library',
       'meta.description':
         'Delete repeated songs from your Spotify playlists and saved tracks automatically. Quickly and easy.',
       'features.find-remove.header': 'Find & remove',
@@ -31,21 +29,17 @@ const resources = {
       'features.open-source.body':
         "You might want to have a look at the {{- linkGithubOpen}}source code on GitHub{{- linkGithubClose}}. This web app uses the {{- linkWebApiOpen}}Spotify Web API{{- linkWebApiClose}} to manage user's playlists and saved tracks.",
       'reviews.title': 'This is what users are saying',
-      'footer.author': 'Made with ♥ by {{- linkOpen}}JMPerez 👨‍💻{{- linkClose}}',
+      'footer.author1': 'Made with ♥ by {{- linkOpen}}Becca{{- linkClose}}',
+      'footer.author2': 'and {{- linkOpen}}Katelyn 👨‍💻{{- linkClose}}',
       'footer.github':
-        'Check out the {{- linkOpen}}code on GitHub 📃{{- linkClose}}',
-      'footer.bmc':
-        'Support the project {{- linkOpen}}buying a coffee ☕{{- linkClose}}',
-      'footer.spotify-top':
-        'Visit {{- linkOpen}}Spotify Top 🎧{{- linkClose}} to see stats about your listening history',
-      'bmc.button': 'Would you buy me a coffee?',
+        'Check out the original {{- linkOpen}}Spotify Dedup code{{- linkClose}} on GitHub 📃',
       'result.duplicate.reason-same-id': 'Duplicate',
       'result.duplicate.reason-same-data':
         'Duplicate (same name, artist and duration)',
       'result.duplicate.track':
         '<0>{{trackName}}</0> <2>by</2> <4>{{trackArtistName}}</4>',
       'process.status.finding':
-        'Finding duplicates in your playlists and saved songs…',
+        'Finding underplayed songs in your playlists and saved songs…',
       'process.status.complete': 'Processing complete!',
       'process.status.complete.body':
         'Your playlists and saved songs have been processed!',
@@ -56,22 +50,22 @@ const resources = {
       'process.reading-library':
         'Going through your library, finding the playlists you own and your saved songs…',
       'process.processing_one':
-        'Searching for duplicate songs, wait a sec. Still to process {{count}} playlist…',
+        'Searching for underplayed songs, wait a sec. Still to process {{count}} playlist…',
       'process.processing_other':
-        'Searching for duplicate songs, wait a sec. Still to process {{count}} playlists…',
+        'Searching for underplayed songs, wait a sec. Still to process {{count}} playlists…',
       'process.saved.title': 'Saved songs in your library',
       'process.saved.duplicates_one':
-        'This collection has {{count}} duplicate song',
+        'This collection has {{count}} underplayed songs',
       'process.saved.duplicates_other':
-        'This collection has {{count}} duplicate songs',
-      'process.saved.remove-button': 'Remove duplicates from your saved songs',
+        'This collection has {{count}} underplayed songs',
+      'process.saved.remove-button': 'Remove underplayed songs from your saved songs',
       'process.playlist.createPlaylist-button': 'Create playlist from {{count}} songs',
       'process.playlist.duplicates_one':
         'This playlist has {{count}} duplicate song',
       'process.playlist.duplicates_other':
         'This playlist has {{count}} duplicate songs',
-      'process.playlist.remove-button': 'Remove duplicates from this playlist',
-      'process.items.removed': 'Duplicates removed',
+      'process.playlist.remove-button': 'Remove underplayed songs from this playlist',
+      'process.items.removed': 'Underplayed songs removed',
       'spotifytop.heading': '🚀 Introducing Spotify Top!',
       'spotifytop.description':
         'Ever wondered what artists, songs, or genres you have been listening the most lately?',

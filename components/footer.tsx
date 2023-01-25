@@ -8,39 +8,29 @@ const Footer = () => {
       <p>
         <span
           dangerouslySetInnerHTML={{
-            __html: t('footer.author', {
+            __html: t('footer.author1', {
               linkOpen:
-                '<a target="_blank" rel="noreferrer" href="https://jmperezperez.com">',
+                '<a target="_blank" rel="noreferrer" href="https://github.com/beccathomson">',
               linkClose: '</a>',
             }),
           }}
         />{' '}
+        {' '}
+        <span
+          dangerouslySetInnerHTML={{
+            __html: t('footer.author2', {
+              linkOpen:
+                '<a target="_blank" rel="noreferrer" href="https://github.com/kvangorp">',
+              linkClose: '</a>',
+            }),
+          }}
+        />
         ·{' '}
         <span
           dangerouslySetInnerHTML={{
             __html: t('footer.github', {
               linkOpen:
                 '<a target="_blank" rel="noreferrer" href="https://github.com/JMPerez/spotify-dedup/">',
-              linkClose: '</a>',
-            }),
-          }}
-        />
-        ·{' '}
-        <span
-          dangerouslySetInnerHTML={{
-            __html: t('footer.bmc', {
-              linkOpen:
-                '<a target="_blank" rel="noreferrer" href="https://www.buymeacoffee.com/jmp">',
-              linkClose: '</a>',
-            }),
-          }}
-        />
-        ·{' '}
-        <span
-          dangerouslySetInnerHTML={{
-            __html: t('footer.spotify-top', {
-              linkOpen:
-                '<a target="_blank" rel="noreferrer" href="https://spotify-top.com">',
               linkClose: '</a>',
             }),
           }}

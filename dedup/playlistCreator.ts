@@ -10,7 +10,10 @@ import { PlaylistModel } from './types';
 
 export class PlaylistCreator {
 
-    static async createPlaylistFromTracks(api: SpotifyWebApi, userId: string, trackUris: Array<string>) {
+    static async createPlaylistFromTracks(api: SpotifyWebApi, userId: string, trackMap: Map<string, Array<SpotifyTrackType>>) {
+        let allTracks = [];
+        trackMap.forEach((trackArray, __) => allTracks.concat(trackArray));
+        const trackUris = allTracks.map(track => track.uri);
 
         // create the playlist
         return new Promise<void>((resolve, reject) => {

@@ -153,18 +153,15 @@ export default class SpotifyWebApi {
   }
 
   async removeTracksFromPlaylist(
-    userId: string,
     playlistId: string,
-    uris: Array<string | { uri: string; positions: number[] }>
+    uris: Array<string>
   ) {
     const dataToBeSent = {
-      tracks: uris.map((uri) => (typeof uri === 'string' ? { uri: uri } : uri)),
+      tracks: uris.map((uri) => { uri }),
     };
 
     const res = await fetch(
-      `${apiPrefix}/users/${encodeURIComponent(
-        userId
-      )}/playlists/${playlistId}/tracks`,
+      `${apiPrefix}/playlists/${playlistId}/tracks`,
       {
         method: 'DELETE',
         headers: {
