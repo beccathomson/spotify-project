@@ -6,7 +6,7 @@ import {
   PlaylistCreator
 } from "../dedup/playlistCreator";
 import { SpotifyTrackType, SpotifyUserType } from '../dedup/spotifyApi';
-import { Translation, getI18n, useTranslation } from 'react-i18next';
+import { Translation, useTranslation } from 'react-i18next';
 
 import Badge from './badge';
 import { DuplicateTrackList } from './duplicateTrackList';
@@ -15,7 +15,6 @@ import Panel from './panel';
 import { PlaylistModel } from '../dedup/types';
 import Process from '../dedup/process';
 import React from 'react';
-import { t } from 'i18next';
 
 const Status = ({ toProcess }) => {
   const { t } = useTranslation();

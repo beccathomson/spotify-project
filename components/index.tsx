@@ -1,15 +1,15 @@
-import Footer from '../footer';
+import Footer from './footer';
 import Head from 'next/head';
-import Header from '../head';
-import Intro from '../intro';
-import Main from '../main';
-import OAuthManager from '../../dedup/oauthManager';
+import Header from './head';
+import Intro from './intro';
+import Main from './main';
+import OAuthManager from '../dedup/oauthManager';
 import React from 'react';
-import SpotifyWebApi from '../../dedup/spotifyApi';
+import SpotifyWebApi from '../dedup/spotifyApi';
 import { useTranslation } from 'react-i18next';
 
 const MetaHead = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   return (
     <Head>
       <title>{t('meta.title')}</title>
@@ -19,9 +19,8 @@ const MetaHead = () => {
       <meta property="og:description" content={t('meta.description')} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="viewport" content="width=device-width" />
-      <meta property="og:image" content="https://spotify-dedup.com/spotify-dedup-meta.png" />
       <meta property="og:type" content="website" />
-      <link rel="icon" href="https://spotify-funky-project.com/logo.svg" />
+      <link rel="icon" href="images/logo.svg" />
     </Head>
   );
 };

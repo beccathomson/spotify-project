@@ -8,6 +8,6 @@ module.exports = {
   },
   plugins: [],
   icons: [
-    "./components/icon.svg"
+    "./components/logo.svg"
   ]
 }
