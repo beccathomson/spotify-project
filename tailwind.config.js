@@ -7,4 +7,7 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  icons: [
+    "./components/icon.svg"
+  ]
 }

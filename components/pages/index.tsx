@@ -25,7 +25,7 @@ const MetaHead = () => {
       <meta property="og:image" content="https://spotify-dedup.com/spotify-dedup-meta.png" />
       <meta property="og:type" content="website" />
       <link rel="alternate" hrefLang="x-default" href="https://spotify-dedup.com/" />
-      <link rel="icon" href="https://spotify-dedup.com/logo.svg" />
+      <link rel="icon" href="./logo.svg" />
     </Head>
   );
 };
