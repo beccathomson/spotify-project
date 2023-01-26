@@ -18,17 +18,7 @@ const resources = {
       'meta.title':
         'Spotify Funky Project - Discover underplayed songs from your Spotify library',
       'meta.description':
-        'Delete repeated songs from your Spotify playlists and saved tracks automatically. Quickly and easy.',
-      'features.find-remove.header': 'Find & remove',
-      'features.find-remove.body':
-        'Dedup checks your playlists and saved songs in {{- strongOpen}}your Spotify library{{- strongClose}}. Once Dedup finds duplicates you can remove them per-playlist basis.',
-      'features.safer.header': 'Safer',
-      'features.safer.body':
-        'Dedup will only remove {{- strongOpen}}duplicate songs{{- strongClose}}, leaving the rest of the playlist and saved songs untouched.',
-      'features.open-source.header': 'Open Source',
-      'features.open-source.body':
-        "You might want to have a look at the {{- linkGithubOpen}}source code on GitHub{{- linkGithubClose}}. This web app uses the {{- linkWebApiOpen}}Spotify Web API{{- linkWebApiClose}} to manage user's playlists and saved tracks.",
-      'reviews.title': 'This is what users are saying',
+        'Discover underplayed songs and artists from your Spotify playlists and saved tracks. Quick and easy.',
       'footer.author1': 'Made with ♥ by {{- linkOpen}}Becca{{- linkClose}}',
       'footer.author2': 'and {{- linkOpen}}Katelyn 👨‍💻{{- linkClose}}',
       'footer.github':
@@ -45,8 +35,6 @@ const resources = {
         'Your playlists and saved songs have been processed!',
       'process.status.complete.dups.body':
         'Click on the {{- strongOpen}}Remove duplicates{{- strongClose}} button to get rid of duplicates in that playlist or saved songs collection.',
-      'process.status.complete.nodups.body':
-        "Congrats! You don't have duplicates in your playlists nor saved songs.",
       'process.reading-library':
         'Going through your library, finding the playlists you own and your saved songs…',
       'process.processing_one':
@@ -61,17 +49,11 @@ const resources = {
       'process.saved.remove-button': 'Remove underplayed songs from your saved songs',
       'process.playlist.createPlaylist-button': 'Create playlist from {{count}} songs',
       'process.playlist.duplicates_one':
-        'This playlist has {{count}} duplicate song',
+        'This playlist has {{count}} underplayed song',
       'process.playlist.duplicates_other':
-        'This playlist has {{count}} duplicate songs',
+        'This playlist has {{count}} underplayed songs',
       'process.playlist.remove-button': 'Remove underplayed songs from this playlist',
       'process.items.removed': 'Underplayed songs removed',
-      'spotifytop.heading': '🚀 Introducing Spotify Top!',
-      'spotifytop.description':
-        'Ever wondered what artists, songs, or genres you have been listening the most lately?',
-      'spotifytop.check1': 'Check my latest project',
-      'spotifytop.check2':
-        'to get personalized insights about what you have been playing on Spotify',
     },
   },
   fallbackLng: 'en',

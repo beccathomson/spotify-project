@@ -156,9 +156,6 @@ export default class Main extends React.Component<{
                 {(t) => t('process.status.complete.body')}
               </Translation>
               <br />
-              <Translation>
-                {(t) => t('process.status.complete.nodups.body')}
-              </Translation>
               {this.state.hasUsedSpotifyTop === false ? (
                 <div>
                   <p>
