@@ -1,18 +1,12 @@
-import promisesForPages from './promiseForPages';
 import SpotifyWebApi, {
     SpotifyTrackType,
-    SpotifyPlaylistType,
-    SpotifyPlaylistTrackType,
-    SpotifySavedTrackType,
-    SpotifyArtistType,
 } from './spotifyApi';
-import { PlaylistModel } from './types';
 
 export class PlaylistCreator {
 
     static async createPlaylistFromTracks(api: SpotifyWebApi, userId: string, trackMap: Map<string, Array<SpotifyTrackType>>) {
         let allTracks = [];
-        trackMap.forEach((trackArray, __) => allTracks.concat(trackArray));
+        trackMap.forEach((trackArray, __) => allTracks = allTracks.concat(trackArray));
         const trackUris = allTracks.map(track => track.uri);
 
         // create the playlist

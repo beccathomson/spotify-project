@@ -106,7 +106,6 @@ export default class {
     });
 
     if (allTopArtists) {
-      console.log(allTopArtists.map((artist) => artist.name));
       playlistsToCheck = ownedPlaylists;
       currentState.playlists = playlistsToCheck.map((p) =>
         playlistToPlaylistModel(p)

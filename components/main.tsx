@@ -40,12 +40,13 @@ type StateType = {
       track: SpotifyTrackType;
     }>;
   };
-  hasUsedSpotifyTop?: boolean;
   // selectedTracks: Array<SpotifyTrackType>; // needs to be a map????
-  selectedTracks: Map<string, Array<SpotifyTrackType>>;
+  // selectedTracks: Map<string, Array<SpotifyTrackType>>;
 };
 
 export const SAVED_SONGS_ID = "SAVED";
+
+const selectedTracks = new Map();
 
 export default class Main extends React.Component<{
   api: any;
@@ -59,7 +60,6 @@ export default class Main extends React.Component<{
       status: null,
       unpopularSongs: [],
     },
-    selectedTracks: new Map(),
   };
 
   componentDidMount() {
@@ -69,33 +69,17 @@ export default class Main extends React.Component<{
     });
     process.process(this.props.api, this.props.user);
 
-    const hasUsedSpotifyTop = async () => {
-      const res = await fetch(`https://spotify-top.com/api/profile`, {
-        method: 'GET',
-        headers: { 'Spotify-Auth': this.props.accessToken },
-      });
-      const data = await res.json();
-      return data.hasUsedSpotifyTop;
-    };
-
-    try {
-      hasUsedSpotifyTop()
-        .then((result) => {
-          this.setState({ hasUsedSpotifyTop: result === true });
-        })
-        .catch((e) => { });
-    } catch (e) { }
   }
 
-  createNewPlaylist = () => {
-    PlaylistCreator.createPlaylistFromTracks(this.props.api, this.props.user.id, this.state.selectedTracks)
+  createNewPlaylist = (selectedTrackMap) => {
+    PlaylistCreator.createPlaylistFromTracks(this.props.api, this.props.user.id, selectedTrackMap)
   }
 
   removeSelectedSongs(playlistId: string) {
     (async () => {
       await SavedTracksDeduplicator.removeSelectedSongs(
         this.props.api,
-        this.state.selectedTracks,
+        selectedTracks,
         playlistId
       );
       this.setState({
@@ -117,7 +101,7 @@ export default class Main extends React.Component<{
   }
 
   render() {
-    const totalSelected = this.state.selectedTracks.size;
+    const totalSelected = selectedTracks.size;
 
     return (
       <div className="mx-4 md:mx-0">
@@ -156,32 +140,7 @@ export default class Main extends React.Component<{
                 {(t) => t('process.status.complete.body')}
               </Translation>
               <br />
-              {this.state.hasUsedSpotifyTop === false ? (
-                <div>
-                  <p>
-                    <strong>
-                      <Translation>
-                        {(t) => t('spotifytop.heading')}
-                      </Translation>
-                    </strong>{' '}
-                    <Translation>
-                      {(t) => t('spotifytop.description')}
-                    </Translation>{' '}
-                    <strong>
-                      <Translation>{(t) => t('spotifytop.check1')}</Translation>
-                      ,{' '}
-                      <a
-                        href="https://spotify-top.com/?ref=spotifydedup"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Spotify Top
-                      </a>
-                    </strong>{' '}
-                    <Translation>{(t) => t('spotifytop.check2')}</Translation>
-                  </p>
-                </div>
-              ) : null}
+
             </span>
           )}
         </Panel>
@@ -231,7 +190,7 @@ export default class Main extends React.Component<{
                         </button>
                         <button
                           className="btn btn-primary btn-sm playlist-list-item__btn"
-                          onClick={() => this.createNewPlaylist()}
+                          onClick={() => this.createNewPlaylist(selectedTracks)}
                         >
                           <label>
                             Create playlist from selected songs
@@ -248,15 +207,15 @@ export default class Main extends React.Component<{
                                   trackArtistName={song.track.artists[0].name}
                                 />
                                 <input value={song.track.uri} onChange={(e) => {
-                                  let selectedSavedTracks = this.state.selectedTracks.get(SAVED_SONGS_ID) ?? [];
+                                  let selectedSavedTracks = selectedTracks.get(SAVED_SONGS_ID) ?? [];
                                   const targetTrack = this.state.savedTracks.unpopularSongs.find((track) => track.track.uri === e.target.value);
-                                  if (selectedSavedTracks?.includes(targetTrack.track))
-                                    delete this.state.selectedTracks[targetTrack.track.id];
+                                  if (selectedSavedTracks?.includes(targetTrack.track)) {
+                                    delete selectedTracks[targetTrack.track.id]; // fix this
+                                  }
                                   else {
-                                    const newMap = this.state.selectedTracks;
-                                    newMap.set(SAVED_SONGS_ID, [...selectedSavedTracks, targetTrack.track]);
-                                    this.state.selectedTracks.set(SAVED_SONGS_ID, [...selectedSavedTracks, targetTrack.track]);
-                                    this.setState({ ...this.state, selectedTracks: newMap }); // this is super slow
+                                    console.log(selectedTracks.size);
+                                    selectedTracks.set(SAVED_SONGS_ID, [...selectedSavedTracks, targetTrack.track]);
+                                    console.log(selectedTracks.get(SAVED_SONGS_ID));
                                   }
 
                                 }} type="checkbox" />

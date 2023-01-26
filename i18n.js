@@ -19,8 +19,8 @@ const resources = {
         'Spotify Funky Project - Discover underplayed songs from your Spotify library',
       'meta.description':
         'Discover underplayed songs and artists from your Spotify playlists and saved tracks. Quick and easy.',
-      'footer.author1': 'Made with ♥ by {{- linkOpen}}Becca{{- linkClose}}',
-      'footer.author2': 'and {{- linkOpen}}Katelyn 👨‍💻{{- linkClose}}',
+      'footer.author1': 'Made with ♥ by {{- linkOpen}}Becca 👩‍💻{{- linkClose}}',
+      'footer.author2': 'and {{- linkOpen}}Katelyn 👩‍💻{{- linkClose}}',
       'footer.github':
         'Check out the original {{- linkOpen}}Spotify Dedup code{{- linkClose}} on GitHub 📃',
       'result.duplicate.reason-same-id': 'Duplicate',
@@ -63,19 +63,17 @@ i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
     resources,
-    lng: 'en',
     keySeparator: false, // we do not use keys in form messages.welcome
     debug: false,
     react: {
       transSupportBasicHtmlNodes: false,
     },
     missingKeyHandler: (
-      lng,
-      ns,
+      _ns,
       key,
-      fallbackValue,
-      updateMissing,
-      options
+      _fallbackValue,
+      _updateMissing,
+      _options
     ) => {
       console.log('Missing key', key);
     },
