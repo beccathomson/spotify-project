@@ -20,7 +20,7 @@ const MetaHead = () => {
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="viewport" content="width=device-width" />
       <meta property="og:type" content="website" />
-      <link rel="icon" href="images/logo.svg" />
+      <link rel="icon" href="logo.svg" />
     </Head>
   );
 };
