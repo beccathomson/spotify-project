@@ -23,9 +23,6 @@ const resources = {
       'footer.author2': 'and {{- linkOpen}}Katelyn 👩‍💻{{- linkClose}}',
       'footer.github':
         'Check out the original {{- linkOpen}}Spotify Dedup code{{- linkClose}} on GitHub 📃',
-      'result.duplicate.reason-same-id': 'Duplicate',
-      'result.duplicate.reason-same-data':
-        'Duplicate (same name, artist and duration)',
       'result.duplicate.track':
         '<0>{{trackName}}</0> <2>by</2> <4>{{trackArtistName}}</4>',
       'process.status.finding':

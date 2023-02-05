@@ -7,7 +7,6 @@ import SpotifyWebApi, {
   SpotifySavedTrackType,
   SpotifyArtistType,
 } from './spotifyApi';
-import { PlaylistModel } from './types';
 
 class BaseDeduplicator {
   async removeDuplicates(model) {
@@ -39,7 +38,6 @@ class BaseDeduplicator {
         unpopularSongs.push({
           index: index,
           track: track,
-          reason: 'bad-artist',
         });
       }
 

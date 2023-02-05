@@ -25,6 +25,7 @@
     "puppeteer-core": "^13.5.2",
     "react": "18.0.0",
     "react-chartkick": "^0.5.2",
+    "react-checkbox-group": "^5.0.2",
     "react-dom": "18.0.0",
     "react-i18next": "^11.16.2",
     "swr": "^1.2.2",

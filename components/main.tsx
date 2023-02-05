@@ -1,5 +1,4 @@
 import {
-  PlaylistDeduplicator,
   SavedTracksDeduplicator,
 } from '../dedup/deduplicator';
 import {
@@ -10,11 +9,12 @@ import { Translation, useTranslation } from 'react-i18next';
 
 import Badge from './badge';
 import { DuplicateTrackList } from './duplicateTrackList';
-import { DuplicateTrackListItem } from './duplicateTrackListItem';
 import Panel from './panel';
 import { PlaylistModel } from '../dedup/types';
 import Process from '../dedup/process';
 import React from 'react';
+
+
 
 const Status = ({ toProcess }) => {
   const { t } = useTranslation();
@@ -36,17 +36,14 @@ type StateType = {
     status?: string;
     unpopularSongs: Array<{
       index: number;
-      reason: string;
       track: SpotifyTrackType;
     }>;
   };
-  // selectedTracks: Array<SpotifyTrackType>; // needs to be a map????
-  // selectedTracks: Map<string, Array<SpotifyTrackType>>;
 };
 
 export const SAVED_SONGS_ID = "SAVED";
 
-const selectedTracks = new Map();
+const selectedTracks = new Map<string, SpotifyTrackType[]>();
 
 export default class Main extends React.Component<{
   api: any;
@@ -62,20 +59,21 @@ export default class Main extends React.Component<{
     },
   };
 
+
+
   componentDidMount() {
     const process = new Process();
-    process.on('updateState', (state) => {
+    process.on('updateState', (state: {} | ((prevState: Readonly<{}>, props: Readonly<{ api: any; user: SpotifyUserType; accessToken: string; }>) => {} | Pick<{}, never>) | Pick<{}, never>) => {
       this.setState(state);
     });
     process.process(this.props.api, this.props.user);
-
   }
 
-  createNewPlaylist = (selectedTrackMap) => {
+  createNewPlaylist = (selectedTrackMap: Map<any, any>) => {
     PlaylistCreator.createPlaylistFromTracks(this.props.api, this.props.user.id, selectedTrackMap)
   }
 
-  removeSelectedSongs(playlistId: string) {
+  removeSelectedSongs(playlistId: string, selectedTracks: Map<string, SpotifyTrackType[]>) {
     (async () => {
       await SavedTracksDeduplicator.removeSelectedSongs(
         this.props.api,
@@ -101,7 +99,6 @@ export default class Main extends React.Component<{
   }
 
   render() {
-    const totalSelected = selectedTracks.size;
 
     return (
       <div className="mx-4 md:mx-0">
@@ -115,7 +112,7 @@ export default class Main extends React.Component<{
               {(t) => t('process.processing', { count: this.state.toProcess })}
             </Translation>
           )}
-          {this.state.toProcess === 0 && totalSelected > 0 && (
+          {this.state.toProcess === 0 && (
             <span>
               <Translation>
                 {(t) => t('process.status.complete.body')}
@@ -134,7 +131,7 @@ export default class Main extends React.Component<{
               </Translation>
             </span>
           )}
-          {this.state.toProcess === 0 && totalSelected === 0 && (
+          {this.state.toProcess === 0 && (
             <span>
               <Translation>
                 {(t) => t('process.status.complete.body')}
@@ -182,7 +179,7 @@ export default class Main extends React.Component<{
                         </span>
                         <button
                           className="btn btn-primary btn-sm playlist-list-item__btn"
-                          onClick={() => this.removeSelectedSongs(SAVED_SONGS_ID)}
+                          onClick={() => this.removeSelectedSongs(SAVED_SONGS_ID, selectedTracks)}
                         >
                           <label>
                             Remove selected songs from saved tracks
@@ -196,33 +193,26 @@ export default class Main extends React.Component<{
                             Create playlist from selected songs
                           </label>
                         </button>
-                        <DuplicateTrackList>
-                          {this.state.savedTracks.unpopularSongs.map(
-                            (song, index) => (
-                              <div key={index} className="itemWithCheckbox">
-                                <DuplicateTrackListItem
-                                  key={index}
-                                  reason={song.reason}
-                                  trackName={song.track.name}
-                                  trackArtistName={song.track.artists[0].name}
-                                />
-                                <input value={song.track.uri} onChange={(e) => {
-                                  let selectedSavedTracks = selectedTracks.get(SAVED_SONGS_ID) ?? [];
-                                  const targetTrack = this.state.savedTracks.unpopularSongs.find((track) => track.track.uri === e.target.value);
-                                  if (selectedSavedTracks?.includes(targetTrack.track)) {
-                                    delete selectedTracks[targetTrack.track.id]; // fix this
-                                  }
-                                  else {
-                                    console.log(selectedTracks.size);
-                                    selectedTracks.set(SAVED_SONGS_ID, [...selectedSavedTracks, targetTrack.track]);
-                                    console.log(selectedTracks.get(SAVED_SONGS_ID));
-                                  }
+                        <br />
+                        <label>Select All </label>
+                        <input value={SAVED_SONGS_ID} onChange={(e) => {
+                          const selected = e.target.checked;
+                          const savedTracks = this.state.savedTracks.unpopularSongs.map(item => item.track);
+                          if (selected) {
+                            selectedTracks[SAVED_SONGS_ID] = savedTracks;
+                          }
+                          else {
+                            selectedTracks[SAVED_SONGS_ID] = [];
+                          }
+                        }} type="checkbox" >
+                        </input>
 
-                                }} type="checkbox" />
-                              </div>
-                            )
-                          )}
-                        </DuplicateTrackList>
+                        <DuplicateTrackList
+                          playlistId={SAVED_SONGS_ID}
+                          selectionCallback={(playlistId, theseSelectedTracks) => {
+                            selectedTracks[playlistId] = theseSelectedTracks;
+                          }}
+                          childTracks={this.state.savedTracks.unpopularSongs} />
                       </span>
                     )}
                   </div>
@@ -266,29 +256,24 @@ export default class Main extends React.Component<{
                         </span>
                         <button
                           className="btn btn-primary btn-sm playlist-list-item__btn"
-                          onClick={() => this.removeSelectedSongs(playlist.playlist.id)}
+                          onClick={() => this.removeSelectedSongs(playlist.playlist.id, selectedTracks)}
                         >
                           <label>
                             Remove selected songs from playlist
                           </label>
                         </button>
-                        <DuplicateTrackList>
-                          {playlist.unpopularSongs.map((duplicate, index) => (
-                            <DuplicateTrackListItem
-                              key={index}
-                              reason={duplicate.reason}
-                              trackName={duplicate.track.name}
-                              trackArtistName={duplicate.track.artists[0].name}
-                            />
-                          ))}
-                        </DuplicateTrackList>
+                        <DuplicateTrackList childTracks={playlist.unpopularSongs} playlistId={playlist.playlist.id}
+                          selectionCallback={(playlistId, theseSelectedTracks) => {
+                            selectedTracks[playlistId] = theseSelectedTracks;
+                          }} />
                       </span>
                     )}
                   </div>
                 </li>
               ))}
           </ul>
-        )}
+        )
+        }
         <style jsx>
           {`
             .bd {
@@ -375,7 +360,7 @@ export default class Main extends React.Component<{
             }
           `}
         </style>
-      </div>
+      </div >
     );
   }
 }

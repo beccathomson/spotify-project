@@ -90,20 +90,22 @@ export default class {
     });
 
 
-    const ownedPlaylists: Array<SpotifyPlaylistType> = await fetchUserOwnedPlaylists(
-      api,
-      user.id
-    ).catch((e) => {
-      if (global['ga']) {
-        global['ga'](
-          'send',
-          'event',
-          'spotify-dedup',
-          'error-fetching-user-playlists'
-        );
-      }
-      console.error("There was an error fetching user's playlists", e);
-    });
+    // const ownedPlaylists: Array<SpotifyPlaylistType> = await fetchUserOwnedPlaylists(
+    //   api,
+    //   user.id
+    // ).catch((e) => {
+    //   if (global['ga']) {
+    //     global['ga'](
+    //       'send',
+    //       'event',
+    //       'spotify-dedup',
+    //       'error-fetching-user-playlists'
+    //     );
+    //   }
+    //   console.error("There was an error fetching user's playlists", e);
+    // });
+
+    const ownedPlaylists = [];
 
     if (allTopArtists) {
       playlistsToCheck = ownedPlaylists;

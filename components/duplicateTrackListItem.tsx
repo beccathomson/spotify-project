@@ -1,32 +1,40 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
-import Badge from './badge';
+import { Checkbox } from './checkbox';
 
-export const DuplicateTrackListItem = ({
-  reason,
-  trackName,
-  trackArtistName,
-}) => {
-  const { t, i18n } = useTranslation();
+export interface DuplicateTrackListItemProps {
+  selected: boolean;
+  trackName: string;
+  trackArtistName: string;
+  uriValue: string;
+  onChange: () => void;
+}
+
+export const DuplicateTrackListItem = (props: DuplicateTrackListItemProps) => {
+  const { selected, trackName, trackArtistName, uriValue, onChange } = props;
   return (
-    <li>
-      {reason === 'same-id' && (
-        <Badge>{t('result.duplicate.reason-same-id')}</Badge>
-      )}
-      {reason === 'same-name-artist' && (
-        <Badge>{t('result.duplicate.reason-same-data')}</Badge>
-      )}
-      <Trans i18nKey="result.duplicate.track">
-        <span>{{ trackName }}</span> <span className="gray">by</span>{' '}
-        <span>{{ trackArtistName }}</span>
-      </Trans>
+    <li key={uriValue} className="songRow">
+      <span>
+        <span>{trackName}</span> <span className="gray">by</span>{' '}
+        <span>{trackArtistName}</span>
+      </span>
+      <Checkbox selected={selected}
+        onChangeCallback={onChange}
+        uriValue={uriValue} ></Checkbox>
       <style jsx>
         {`
-          .gray {
-            color: #999;
-          }
-        `}
+        .gray {
+          color: #999;
+        }
+
+        .songRow {
+          display: flex;
+          justify-content: space-between;
+        }
+      `}
       </style>
     </li>
   );
 };
+
+
+
