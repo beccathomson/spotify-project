@@ -15,7 +15,6 @@ import Process from '../dedup/process';
 import React from 'react';
 
 
-
 const Status = ({ toProcess }) => {
   const { t } = useTranslation();
   return (
@@ -194,25 +193,13 @@ export default class Main extends React.Component<{
                           </label>
                         </button>
                         <br />
-                        <label>Select All </label>
-                        <input value={SAVED_SONGS_ID} onChange={(e) => {
-                          const selected = e.target.checked;
-                          const savedTracks = this.state.savedTracks.unpopularSongs.map(item => item.track);
-                          if (selected) {
-                            selectedTracks[SAVED_SONGS_ID] = savedTracks;
-                          }
-                          else {
-                            selectedTracks[SAVED_SONGS_ID] = [];
-                          }
-                        }} type="checkbox" >
-                        </input>
-
                         <DuplicateTrackList
                           playlistId={SAVED_SONGS_ID}
                           selectionCallback={(playlistId, theseSelectedTracks) => {
                             selectedTracks[playlistId] = theseSelectedTracks;
                           }}
-                          childTracks={this.state.savedTracks.unpopularSongs} />
+                          childTracks={this.state.savedTracks.unpopularSongs.map(song => song.track)}
+                          initialSelectedTracks={selectedTracks[SAVED_SONGS_ID]} />
                       </span>
                     )}
                   </div>
@@ -262,7 +249,7 @@ export default class Main extends React.Component<{
                             Remove selected songs from playlist
                           </label>
                         </button>
-                        <DuplicateTrackList childTracks={playlist.unpopularSongs} playlistId={playlist.playlist.id}
+                        <DuplicateTrackList childTracks={playlist.unpopularSongs.map(song => song.track)} playlistId={playlist.playlist.id}
                           selectionCallback={(playlistId, theseSelectedTracks) => {
                             selectedTracks[playlistId] = theseSelectedTracks;
                           }} />

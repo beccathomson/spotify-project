@@ -1,17 +1,19 @@
 import { SpotifyTrackType } from '@/dedup/spotifyApi';
 import React, { useEffect, useState } from 'react';
-import { Checkbox } from './checkbox';
 import { DuplicateTrackListItem } from './duplicateTrackListItem';
+import { SelectAll } from './selectAll';
 
 export interface TrackListProps {
   playlistId: string;
-  childTracks: Array<{ index: number, track: SpotifyTrackType }>;
+  childTracks: Array<SpotifyTrackType>;
   selectionCallback: (playlistId: string, selectedTracks: Array<SpotifyTrackType>) => void;
+  initialSelectedTracks?: Array<SpotifyTrackType>;
 }
 
 export const DuplicateTrackList = (props: TrackListProps): JSX.Element => {
-  const { childTracks, playlistId, selectionCallback } = props;
-  const [selectedTracks, setSelectedTracks] = useState(new Array<SpotifyTrackType>());
+  const { childTracks, playlistId, selectionCallback, initialSelectedTracks = [] } = props;
+  console.log(initialSelectedTracks);
+  const [selectedTracks, setSelectedTracks] = useState(initialSelectedTracks);
   useEffect(() => {
     console.log(selectedTracks);
     selectionCallback(playlistId, selectedTracks);
@@ -19,19 +21,27 @@ export const DuplicateTrackList = (props: TrackListProps): JSX.Element => {
 
   return (
     <div>
-      {childTracks.map((song) => {
+      <SelectAll playlistId={playlistId} onChange={(selected) => {
+        if (selected) {
+          setSelectedTracks(childTracks);
+        }
+        else {
+          setSelectedTracks([]);
+        }
+      }} />
+      {childTracks.map((track) => {
         return (
           <DuplicateTrackListItem
-            selected={selectedTracks.includes(song.track)}
-            trackName={song.track.name}
-            trackArtistName={song.track.artists[0].name}
-            uriValue={song.track.uri}
+            selected={selectedTracks.includes(track)}
+            trackName={track.name}
+            trackArtistName={track.artists[0].name}
+            uriValue={track.uri}
             onChange={() => {
               let newState = [...selectedTracks];
-              if (selectedTracks.includes(song.track))
-                newState = newState.filter((selectedTrack) => selectedTrack.id !== song.track.id)
+              if (selectedTracks.includes(track))
+                newState = newState.filter((selectedTrack) => selectedTrack.id !== track.id)
               else
-                newState.push(song.track)
+                newState.push(track)
               setSelectedTracks(newState)
             }}
           />)
